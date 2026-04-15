@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业标签生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 32px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 24px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .upload-area {
+            border: 2px dashed #d0d7de;
+            border-radius: 12px;
+            padding: 48px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafbfc;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f5f0ff;
+        }
+        
+        .upload-icon { font-size: 40px; margin-bottom: 12px; }
+        .upload-text { color: #666; font-size: 14px; line-height: 1.8; }
+        #fileInput { display: none; }
+        
+        .input-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .input-group { flex: 1; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .logo-process-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .logo-compare {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-box {
+            text-align: center;
+        }
+        
+        .logo-box-title {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        
+        .logo-box-img {
+            width: 70px;
+            height: 70px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .logo-box-img img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: contain;
+        }
+        
+        .logo-arrow {
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .process-details {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .process-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        
+        .process-badge.trim { background: #e8f5e9; color: #2e7d32; }
+        .process-badge.ok { background: #e3f2fd; color: #1976d2; }
+        .process-badge.white { background: #f3e5f5; color: #7b1fa2; }
+        
+        .process-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .trim-stats {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            padding: 6px 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .bg-color-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .bg-color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .single-scheme-notice {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .single-scheme-notice .notice-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .single-scheme-notice .notice-content {
+            flex: 1;
+        }
+        
+        .single-scheme-notice .notice-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 4px;
+        }
+        
+        .single-scheme-notice .notice-text {
+            font-size: 13px;
+            color: #1976d2;
+            line-height: 1.5;
+        }
+
+        .compare-section { display: none; }
+        .compare-section.show { display: block; }
+        
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .compare-grid.single-scheme {
+            grid-template-columns: 1fr;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            .compare-grid { grid-template-columns: 1fr; }
+        }
+        
+        .scheme-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .scheme-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15);
+        }
+        
+        .scheme-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .scheme-card.has-issue {
+            border-color: #ff9800;
+        }
+        
+        .scheme-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .scheme-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .scheme-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .scheme-badge.solid { background: #e3f2fd; color: #1976d2; }
+        .scheme-badge.transparent { background: #f3e5f5; color: #7b1fa2; }
+        .scheme-badge.only { background: #e8f5e9; color: #2e7d32; }
+        
+        .scheme-preview {
+            border-radius: 12px;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            background-color: #f5f5f5;
+            background-image: 
+                linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+                linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+                linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+            background-size: 12px 12px;
+        }
+        
+        .scheme-tag {
+            display: inline-flex;
+            align-items: stretch;
+            height: 28px;
+            border-radius: 2px;
+            border: 1px solid;
+            overflow: hidden;
+        }
+        
+        .scheme-tag-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 6px;
+        }
+        
+        .scheme-tag-logo img {
+            height: 20px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .scheme-tag-logo img.white-logo {
+            filter: brightness(0) invert(1);
+        }
+        
+        .scheme-tag-text {
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            font-size: 20px;
+            line-height: 28px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .width-indicator {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        
+        .width-indicator.warning { color: #e65100; }
+        .width-indicator.ok { color: #2e7d32; }
+
+        .check-results {
+            margin-bottom: 16px;
+        }
+        
+        .check-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .check-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .check-item.pass {
+            background: #e8f5e9;
+        }
+        
+        .check-item.fail {
+            background: #ffebee;
+        }
+        
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        
+        .check-icon.pass {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .check-icon.fail {
+            background: #f44336;
+            color: white;
+        }
+        
+        .check-content {
+            flex: 1;
+        }
+        
+        .check-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        
+        .check-desc {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .check-desc.fail {
+            color: #c62828;
+        }
+        
+        .check-detail {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .select-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f1f3;
+            color: #333;
+        }
+        
+        .select-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .scheme-card.selected .select-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .scheme-card.has-issue .select-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .detail-section { display: none; }
+        .detail-section.show { display: block; }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #f0f1f3;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .selected-scheme-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .selected-scheme-info.has-issue {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+        
+        .selected-scheme-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .selected-scheme-note {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .designer-contact-tip {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .designer-contact-tip .tip-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .designer-contact-tip .tip-content {
+            flex: 1;
+        }
+        
+        .designer-contact-tip .tip-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #c62828;
+            margin-bottom: 4px;
+        }
+        
+        .designer-contact-tip .tip-text {
+            font-size: 13px;
+            color: #b71c1c;
+            line-height: 1.5;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 600px) {
+            .download-grid { grid-template-columns: 1fr; }
+        }
+        
+        .download-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .download-item-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .download-item-preview {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            background-color: #e0e0e0;
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 10px 10px;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .download-item-preview.solid-bg { background: none; }
+        
+        .logo-download-box {
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+        
+        .logo-download-box img {
+            height: 30px;
+            width: auto;
+        }
+        
+        .download-item-btn {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .size-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .size-item { text-align: center; }
+        .size-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+        .size-value { font-size: 14px; font-weight: 600; color: #667eea; font-family: 'SF Mono', monospace; }
+        .size-value.warning { color: #e65100; }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .color-grid { grid-template-columns: 1fr; }
+        }
+        
+        .color-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .color-label { font-size: 12px; color: #888; margin-bottom: 10px; }
+        
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .color-swatch.transparent-swatch {
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, #fff 25%, #fff 75%, #ccc 75%),
+                linear-gradient(45deg, #ccc 25%, #fff 25%, #fff 75%, #ccc 75%);
+            background-size: 8px 8px;
+            background-position: 0 0, 4px 4px;
+        }
+        
+        .color-hex {
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .color-rgb { font-size: 11px; color: #999; margin-top: 2px; }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: auto;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .code-block pre {
+            color: #d4d4d4;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 0;
+        }
+        
+        .code-block .comment { color: #6a9955; }
+        .code-block .property { color: #9cdcfe; }
+        .code-block .value { color: #ce9178; }
+        .code-block .selector { color: #d7ba7d; }
+        
+        .copy-code-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: #f0f1f3;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .final-tag-preview {
+            border-radius: 12px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            background-color: #f5f5f5;
+            background-image: 
+                linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
+                linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
+                linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
+            background-size: 12px 12px;
+        }
+        
+        .final-width-note {
+            font-size: 12px;
+            color: #666;
+            background: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+        }
+        
+        .final-width-note.warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏷️ 企业标签生成器</h1>
+        
+        <div class="card">
+            <div class="card-title">📤 上传企业Logo</div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">
+                    点击或拖拽上传企业Logo（PNG/JPG/SVG）<br>
+                    自动裁切空白区域 · 智能识别Logo类型
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/svg+xml">
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label>标签文字</label>
+                    <input type="text" id="tagText" value="协议酒店" placeholder="输入标签文字">
+                </div>
+            </div>
+            
+            <div class="logo-process-info" id="logoProcessInfo" style="display: none;">
+                <div class="logo-compare">
+                    <div class="logo-box">
+                        <div class="logo-box-title">原始</div>
+                        <div class="logo-box-img">
+                            <img id="originalLogoPreview" src="" alt="">
+                        </div>
+                    </div>
+                    <div class="logo-arrow">→</div>
+                    <div class="logo-box">
+                        <div class="logo-box-title">裁切后</div>
+                        <div class="logo-box-img">
+                            <img id="trimmedLogoPreview" src="" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="process-details" id="processDetails"></div>
+            </div>
+        </div>
+        
+        <div class="compare-section" id="compareSection">
+            <div class="card">
+                <div class="card-title">🎨 选择设计方案</div>
+                
+                <div class="single-scheme-notice" id="singleSchemeNotice" style="display: none;">
+                    <div class="notice-icon">💡</div>
+                    <div class="notice-content">
+                        <div class="notice-title">检测到Logo为「纯色背景 + 白色内容」</div>
+                        <div class="notice-text">
+                            此类Logo只适合在品牌底色上使用，透明底色方案不适用。
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="compare-grid" id="compareGrid">
+                    <div class="scheme-card" id="schemeA" onclick="selectScheme('A')">
+                        <div class="scheme-header">
+                            <div class="scheme-title">方案 A</div>
+                            <div class="scheme-badge solid" id="schemeBadgeA">品牌底色</div>
+                        </div>
+                        <div class="scheme-preview">
+                            <div class="scheme-tag" id="tagA">
+                                <div class="scheme-tag-logo" id="tagLogoA">
+                                    <img id="logoA" src="">
+                                </div>
+                                <div class="scheme-tag-text" id="tagTextA">协议酒店</div>
+                            </div>
+                        </div>
+                        <div class="width-indicator" id="widthIndicatorA"></div>
+                        
+                        <div class="check-results">
+                            <div class="check-title">检测结果</div>
+                            <div class="check-list" id="checkListA"></div>
+                        </div>
+                        
+                        <button class="select-btn">选择此方案</button>
+                    </div>
+                    
+                    <div class="scheme-card" id="schemeB" onclick="selectScheme('B')">
+                        <div class="scheme-header">
+                            <div class="scheme-title">方案 B</div>
+                            <div class="scheme-badge transparent">透明底色</div>
+                        </div>
+                        <div class="scheme-preview">
+                            <div class="scheme-tag" id="tagB">
+                                <div class="scheme-tag-logo" id="tagLogoB" style="background: transparent;">
+                                    <img id="logoB" src="">
+                                </div>
+                                <div class="scheme-tag-text" id="tagTextB">协议酒店</div>
+                            </div>
+                        </div>
+                        <div class="width-indicator" id="widthIndicatorB"></div>
+                        
+                        <div class="check-results">
+                            <div class="check-title">检测结果</div>
+                            <div class="check-list" id="checkListB"></div>
+                        </div>
+                        
+                        <button class="select-btn">选择此方案</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-section" id="detailSection">
+            <div class="card">
+                <button class="back-btn" onclick="goBack()">← 返回方案选择</button>
+                
+                <div class="selected-scheme-info" id="selectedSchemeInfo">
+                    <div class="selected-scheme-name" id="selectedSchemeName"></div>
+                    <div class="selected-scheme-note" id="selectedSchemeNote"></div>
+                </div>
+                
+                <div class="designer-contact-tip" id="designerContactTip" style="display: none;">
+                    <div class="tip-icon">⚠️</div>
+                    <div class="tip-content">
+                        <div class="tip-title">检测到识别度问题，请联系设计师</div>
+                        <div class="tip-text" id="designerContactText"></div>
+                    </div>
+                </div>
+                
+                <div class="card-title">👁️ 标签预览</div>
+                <div class="final-tag-preview">
+                    <div class="scheme-tag" id="finalTag" style="transform: scale(1.5);">
+                        <div class="scheme-tag-logo" id="finalTagLogo">
+                            <img id="finalLogo" src="">
+                        </div>
+                        <div class="scheme-tag-text" id="finalTagText">协议酒店</div>
+                    </div>
+                    <div class="final-width-note" id="finalWidthNote"></div>
+                </div>
+                
+                <div class="size-info">
+                    <div class="size-item">
+                        <div class="size-label">标签宽度</div>
+                        <div class="size-value" id="tagSizeDisplay">-</div>
+                    </div>
+                    <div class="size-item">
+                        <div class="size-label">标签高度</div>
+                        <div class="size-value">28px</div>
+                    </div>
+                    <div class="size-item">
+                        <div class="size-label">图片区</div>
+                        <div class="size-value" id="logoSectionSize">-</div>
+                    </div>
+                    <div class="size-item">
+                        <div class="size-label">文字区</div>
+                        <div class="size-value" id="textSectionSize">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">⬇️ 下载资源</div>
+                <div class="download-grid">
+                    <div class="download-item">
+                        <div class="download-item-title" id="logoDownloadTitle">Logo图片</div>
+                        <div class="download-item-preview" id="logoPreviewBox">
+                            <div class="logo-download-box" id="logoDownloadPreviewBox">
+                                <img id="logoDownloadPreview" src="">
+                            </div>
+                        </div>
+                        <button class="download-item-btn" onclick="downloadLogo()">⬇️ 下载Logo</button>
+                    </div>
+                    <div class="download-item">
+                        <div class="download-item-title">完整标签</div>
+                        <div class="download-item-preview">
+                            <canvas id="tagCanvas"></canvas>
+                        </div>
+                        <button class="download-item-btn" onclick="downloadTag()">⬇️ 下载标签</button>
+                    </div>
+                </div>
+                
+                <div class="btn-group" style="margin-top: 16px;">
+                    <button class="btn btn-secondary" onclick="downloadJSON()">📄 下载JSON</button>
+                    <button class="btn btn-secondary" onclick="copyAllColors()">📋 复制颜色</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">🎨 颜色信息</div>
+                <div class="color-grid">
+                    <div class="color-item">
+                        <div class="color-label">边框颜色</div>
+                        <div class="color-row">
+                            <div class="color-swatch" id="borderSwatch"></div>
+                            <div>
+                                <div class="color-hex" id="borderHex">#000</div>
+                                <div class="color-rgb" id="borderRgb">rgb(0,0,0)</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyColor('border')">复制</button>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-label" id="leftBgLabel">左侧背景</div>
+                        <div class="color-row">
+                            <div class="color-swatch" id="leftBgSwatch"></div>
+                            <div>
+                                <div class="color-hex" id="leftBgHex">#000</div>
+                                <div class="color-rgb" id="leftBgRgb">rgb(0,0,0)</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyColor('leftBg')">复制</button>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-label">文字颜色</div>
+                        <div class="color-row">
+                            <div class="color-swatch" id="textSwatch"></div>
+                            <div>
+                                <div class="color-hex" id="textHex">#000</div>
+                                <div class="color-rgb" id="textRgb">rgb(0,0,0)</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyColor('text')">复制</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">💻 CSS代码</div>
+                <div class="code-block">
+                    <button class="copy-code-btn" onclick="copyCSSCode()">📋 复制</button>
+                    <pre id="cssCode"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在处理图片...</div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let originalLogoDataUrl = '';
+        let trimmedLogoDataUrl = '';
+        let whiteLogoDataUrl = '';
+        let logoFile = null;
+        let originalWidth = 0, originalHeight = 0;
+        let trimmedWidth = 0, trimmedHeight = 0;
+        let selectedScheme = null;
+        let originalBrandColor = '#1a365d';
+        let brandColorForBg = '#1a365d';
+        let wasTrimmed = false;
+        let trimStats = null;
+        let detectedBgColor = null;
+        let isWhiteOnColorLogo = false;
+        let contrastResults = { A: { pass: true, ratio: 0 }, B: { pass: true, ratio: 0 } };
+
+        const SPEC = {
+            tagHeight: 28,
+            maxTagWidth: 200,
+            borderWidth: 1,
+            borderRadius: 2,
+            logoHeight: 20,
+            logoPaddingTB: 4,
+            logoPaddingLR: 6,
+            fontSize: 20,
+            lineHeight: 28,
+            fontWeight: 400,
+            textPaddingLR: 6
+        };
+
+        // WCAG对比度计算
+        function getRelativeLuminance(r, g, b) {
+            const [rs, gs, bs] = [r, g, b].map(c => {
+                c = c / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        }
+
+        function getContrastRatio(l1, l2) {
+            const lighter = Math.max(l1, l2);
+            const darker = Math.min(l1, l2);
+            return (lighter + 0.05) / (darker + 0.05);
+        }
+
+        function checkWCAGContrast(fgHex, bgHex) {
+            const fg = hexToRgb(fgHex);
+            const bg = hexToRgb(bgHex);
+            const fgLum = getRelativeLuminance(fg.r, fg.g, fg.b);
+            const bgLum = getRelativeLuminance(bg.r, bg.g, bg.b);
+            const ratio = getContrastRatio(fgLum, bgLum);
+            
+            return {
+                ratio: ratio,
+                A: ratio >= 3,       // WCAG A标准：3:1
+                AA: ratio >= 4.5     // WCAG AA标准：4.5:1
+            };
+        }
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = '#667eea'; });
+        uploadArea.addEventListener('dragleave', () => uploadArea.style.borderColor = '#d0d7de');
+        uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.style.borderColor = '#d0d7de'; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+        document.getElementById('tagText').addEventListener('input', updateTagText);
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) { showToast('请上传图片文件'); return; }
+            logoFile = file;
+            showLoading();
+            const reader = new FileReader();
+            reader.onload = e => { 
+                originalLogoDataUrl = e.target.result; 
+                processLogo(originalLogoDataUrl); 
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function processLogo(imageUrl) {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+                originalWidth = img.width;
+                originalHeight = img.height;
+                
+                setTimeout(() => {
+                    const trimResult = trimLogo(img);
+                    trimmedLogoDataUrl = trimResult.dataUrl;
+                    trimmedWidth = trimResult.width;
+                    trimmedHeight = trimResult.height;
+                    wasTrimmed = trimResult.wasTrimmed;
+                    trimStats = trimResult.stats;
+                    detectedBgColor = trimResult.bgColor;
+                    isWhiteOnColorLogo = trimResult.isWhiteOnColor;
+                    
+                    generateWhiteLogo(trimResult.canvas);
+                    analyzeBrandColor(trimResult.canvas, trimResult.isWhiteOnColor);
+                    calculateContrastResults();
+                    showProcessInfo();
+                    showCompareSection();
+                    hideLoading();
+                }, 50);
+            };
+            img.src = imageUrl;
+        }
+
+        function trimLogo(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const cornerSize = Math.max(5, Math.floor(Math.min(w, h) / 20));
+            const corners = [
+                getAverageColor(data, w, 0, 0, cornerSize, cornerSize),
+                getAverageColor(data, w, w - cornerSize, 0, cornerSize, cornerSize),
+                getAverageColor(data, w, 0, h - cornerSize, cornerSize, cornerSize),
+                getAverageColor(data, w, w - cornerSize, h - cornerSize, cornerSize, cornerSize)
+            ];
+            
+            let bgColor = null;
+            let bgColorCount = 0;
+            
+            for (let i = 0; i < corners.length; i++) {
+                let count = 1;
+                for (let j = i + 1; j < corners.length; j++) {
+                    if (colorsAreSimilar(corners[i], corners[j], 30)) {
+                        count++;
+                    }
+                }
+                if (count > bgColorCount) {
+                    bgColorCount = count;
+                    bgColor = corners[i];
+                }
+            }
+            
+            const hasSolidBg = bgColorCount >= 2 && bgColor && bgColor.a > 200;
+            
+            let isWhiteOnColor = false;
+            let whitePixelCount = 0;
+            let totalContentPixels = 0;
+            
+            if (hasSolidBg) {
+                const step = Math.max(1, Math.floor(Math.min(w, h) / 200));
+                for (let y = 0; y < h; y += step) {
+                    for (let x = 0; x < w; x += step) {
+                        const i = (y * w + x) * 4;
+                        const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                        
+                        if (!colorsAreSimilar(pixel, bgColor, 30) && pixel.a > 200) {
+                            totalContentPixels++;
+                            if (pixel.r > 240 && pixel.g > 240 && pixel.b > 240) {
+                                whitePixelCount++;
+                            }
+                        }
+                    }
+                }
+                
+                if (totalContentPixels > 0 && whitePixelCount / totalContentPixels > 0.7) {
+                    isWhiteOnColor = true;
+                }
+            }
+            
+            let top = h, bottom = 0, left = w, right = 0;
+            let hasContent = false;
+            
+            const step = Math.max(1, Math.floor(Math.min(w, h) / 500));
+            
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    const i = (y * w + x) * 4;
+                    const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                    
+                    let isBackground = false;
+                    
+                    if (pixel.a < 10) {
+                        isBackground = true;
+                    } else if (pixel.r > 245 && pixel.g > 245 && pixel.b > 245 && !hasSolidBg) {
+                        isBackground = true;
+                    } else if (hasSolidBg && colorsAreSimilar(pixel, bgColor, 25)) {
+                        isBackground = true;
+                    }
+                    
+                    if (!isBackground) {
+                        hasContent = true;
+                        if (y < top) top = y;
+                        if (y > bottom) bottom = y;
+                        if (x < left) left = x;
+                        if (x > right) right = x;
+                    }
+                }
+            }
+            
+            if (step > 1 && hasContent) {
+                for (let y = Math.max(0, top - step); y <= Math.min(top + step, h - 1); y++) {
+                    for (let x = Math.max(0, left - step); x <= Math.min(right + step, w - 1); x++) {
+                        const i = (y * w + x) * 4;
+                        const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                        if (!isBackgroundPixel(pixel, bgColor, hasSolidBg)) {
+                            if (y < top) top = y;
+                        }
+                    }
+                }
+                for (let y = Math.min(h - 1, bottom + step); y >= Math.max(0, bottom - step); y--) {
+                    for (let x = Math.max(0, left - step); x <= Math.min(right + step, w - 1); x++) {
+                        const i = (y * w + x) * 4;
+                        const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                        if (!isBackgroundPixel(pixel, bgColor, hasSolidBg)) {
+                            if (y > bottom) bottom = y;
+                        }
+                    }
+                }
+                for (let x = Math.max(0, left - step); x <= Math.min(left + step, w - 1); x++) {
+                    for (let y = top; y <= bottom; y++) {
+                        const i = (y * w + x) * 4;
+                        const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                        if (!isBackgroundPixel(pixel, bgColor, hasSolidBg)) {
+                            if (x < left) left = x;
+                        }
+                    }
+                }
+                for (let x = Math.min(w - 1, right + step); x >= Math.max(0, right - step); x--) {
+                    for (let y = top; y <= bottom; y++) {
+                        const i = (y * w + x) * 4;
+                        const pixel = { r: data[i], g: data[i+1], b: data[i+2], a: data[i+3] };
+                        if (!isBackgroundPixel(pixel, bgColor, hasSolidBg)) {
+                            if (x > right) right = x;
+                        }
+                    }
+                }
+            }
+            
+            if (!hasContent || top > bottom || left > right) {
+                return { 
+                    canvas, 
+                    dataUrl: canvas.toDataURL('image/png'), 
+                    width: w, 
+                    height: h, 
+                    wasTrimmed: false,
+                    stats: null,
+                    bgColor: null,
+                    isWhiteOnColor: false
+                };
+            }
+            
+            const padding = 4;
+            top = Math.max(0, top - padding);
+            bottom = Math.min(h - 1, bottom + padding);
+            left = Math.max(0, left - padding);
+            right = Math.min(w - 1, right + padding);
+            
+            const newW = right - left + 1;
+            const newH = bottom - top + 1;
+            
+            const needTrim = (top > 10 || (h - 1 - bottom) > 10 || left > 10 || (w - 1 - right) > 10);
+            
+            if (!needTrim) {
+                return { 
+                    canvas, 
+                    dataUrl: canvas.toDataURL('image/png'), 
+                    width: w, 
+                    height: h, 
+                    wasTrimmed: false,
+                    stats: { top: 0, bottom: 0, left: 0, right: 0 },
+                    bgColor: hasSolidBg ? rgbToHex(bgColor.r, bgColor.g, bgColor.b) : null,
+                    isWhiteOnColor: isWhiteOnColor
+                };
+            }
+            
+            const trimmedCanvas = document.createElement('canvas');
+            trimmedCanvas.width = newW;
+            trimmedCanvas.height = newH;
+            const trimmedCtx = trimmedCanvas.getContext('2d');
+            trimmedCtx.drawImage(canvas, left, top, newW, newH, 0, 0, newW, newH);
+            
+            return { 
+                canvas: trimmedCanvas, 
+                dataUrl: trimmedCanvas.toDataURL('image/png'), 
+                width: newW, 
+                height: newH, 
+                wasTrimmed: true,
+                stats: {
+                    top: top,
+                    bottom: h - 1 - bottom,
+                    left: left,
+                    right: w - 1 - right,
+                    savedPercent: Math.round((1 - (newW * newH) / (w * h)) * 100)
+                },
+                bgColor: hasSolidBg ? rgbToHex(bgColor.r, bgColor.g, bgColor.b) : null,
+                isWhiteOnColor: isWhiteOnColor
+            };
+        }
+
+        function generateWhiteLogo(canvas) {
+            const whiteCanvas = document.createElement('canvas');
+            whiteCanvas.width = canvas.width;
+            whiteCanvas.height = canvas.height;
+            const ctx = whiteCanvas.getContext('2d');
+            ctx.drawImage(canvas, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, whiteCanvas.width, whiteCanvas.height);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] > 0) {
+                    data[i] = 255;
+                    data[i + 1] = 255;
+                    data[i + 2] = 255;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            whiteLogoDataUrl = whiteCanvas.toDataURL('image/png');
+        }
+
+        function getAverageColor(data, width, startX, startY, w, h) {
+            let r = 0, g = 0, b = 0, a = 0, count = 0;
+            for (let y = startY; y < startY + h; y++) {
+                for (let x = startX; x < startX + w; x++) {
+                    const i = (y * width + x) * 4;
+                    r += data[i];
+                    g += data[i + 1];
+                    b += data[i + 2];
+                    a += data[i + 3];
+                    count++;
+                }
+            }
+            return {
+                r: Math.round(r / count),
+                g: Math.round(g / count),
+                b: Math.round(b / count),
+                a: Math.round(a / count)
+            };
+        }
+
+        function colorsAreSimilar(c1, c2, threshold = 30) {
+            if (!c1 || !c2) return false;
+            return Math.abs(c1.r - c2.r) < threshold &&
+                   Math.abs(c1.g - c2.g) < threshold &&
+                   Math.abs(c1.b - c2.b) < threshold;
+        }
+
+        function isBackgroundPixel(pixel, bgColor, hasSolidBg) {
+            if (pixel.a < 10) return true;
+            if (pixel.r > 245 && pixel.g > 245 && pixel.b > 245 && !hasSolidBg) return true;
+            if (hasSolidBg && colorsAreSimilar(pixel, bgColor, 25)) return true;
+            return false;
+        }
+
+        function analyzeBrandColor(canvas, isWhiteOnColor) {
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const colorCounts = {};
+            
+            const step = Math.max(1, Math.floor(data.length / 4 / 10000));
+            
+            for (let i = 0; i < data.length; i += 4 * step) {
+                const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                if (a < 128) continue;
+                if (isWhiteOnColor && r > 240 && g > 240 && b > 240) continue;
+                if (r > 250 && g > 250 && b > 250) continue;
+                if (r < 15 && g < 15 && b < 15) continue;
+                
+                const key = `${Math.round(r/24)*24},${Math.round(g/24)*24},${Math.round(b/24)*24}`;
+                colorCounts[key] = (colorCounts[key] || 0) + 1;
+            }
+            
+            let dominant = [26, 54, 93], maxCount = 0;
+            for (const [key, c] of Object.entries(colorCounts)) {
+                if (c > maxCount) { maxCount = c; dominant = key.split(',').map(Number); }
+            }
+            
+            originalBrandColor = rgbToHex(...dominant);
+            brandColorForBg = originalBrandColor;
+        }
+
+        // 使用 WCAG A 标准 (3:1)
+        function calculateContrastResults() {
+            const contrast = checkWCAGContrast(originalBrandColor, '#ffffff');
+            contrastResults.A = {
+                pass: contrast.A,
+                ratio: contrast.ratio.toFixed(2)
+            };
+            contrastResults.B = {
+                pass: contrast.A,
+                ratio: contrast.ratio.toFixed(2)
+            };
+        }
+
+        function showProcessInfo() {
+            document.getElementById('logoProcessInfo').style.display = 'flex';
+            document.getElementById('originalLogoPreview').src = originalLogoDataUrl;
+            document.getElementById('trimmedLogoPreview').src = trimmedLogoDataUrl;
+            
+            let html = '';
+            if (wasTrimmed) {
+                html += `<div>
+                    <span class="process-badge trim">✂️ 已裁切</span>
+                    <span class="process-text">${originalWidth}×${originalHeight} → ${trimmedWidth}×${trimmedHeight}px</span>`;
+                if (detectedBgColor) {
+                    html += `<div class="bg-color-info">
+                        <span>检测到背景色:</span>
+                        <div class="bg-color-dot" style="background: ${detectedBgColor}"></div>
+                        <span>${detectedBgColor}</span>
+                    </div>`;
+                }
+                html += `<div class="trim-stats">裁切掉 ${trimStats?.savedPercent || 0}% 空白区域</div>
+                </div>`;
+            } else {
+                html += `<div><span class="process-badge ok">✓ 无需裁切</span><span class="process-text">${originalWidth}×${originalHeight}px</span></div>`;
+            }
+            
+            if (isWhiteOnColorLogo) {
+                html += `<div><span class="process-badge white">🎨 白色Logo</span><span class="process-text">纯色背景 + 白色内容</span></div>`;
+            }
+            
+            html += `<div><span class="process-badge ok">🎨 品牌色</span><span class="process-text">${originalBrandColor}</span></div>`;
+            
+            document.getElementById('processDetails').innerHTML = html;
+        }
+
+        function calculateSizes() {
+            const text = document.getElementById('tagText').value;
+            let logoWidth = Math.round((trimmedWidth / trimmedHeight) * SPEC.logoHeight);
+            let textWidth = text.length * SPEC.fontSize;
+            let textSectionWidth = textWidth + SPEC.textPaddingLR * 2;
+            let logoSectionWidth = logoWidth + SPEC.logoPaddingLR * 2;
+            let totalWidth = logoSectionWidth + textSectionWidth;
+            
+            if (totalWidth > SPEC.maxTagWidth) {
+                const available = SPEC.maxTagWidth - textSectionWidth - SPEC.logoPaddingLR * 2;
+                if (available > 10) {
+                    logoWidth = available;
+                    logoSectionWidth = logoWidth + SPEC.logoPaddingLR * 2;
+                    totalWidth = logoSectionWidth + textSectionWidth;
+                }
+            }
+            
+            return { logoWidth, logoSectionWidth, textSectionWidth, totalWidth, isOverWidth: totalWidth > SPEC.maxTagWidth };
+        }
+
+        // 只检测识别度 - WCAG A标准 (3:1)
+        function renderCheckList(scheme) {
+            const contrast = scheme === 'A' ? contrastResults.A : contrastResults.B;
+            
+            return `<div class="check-item ${contrast.pass ? 'pass' : 'fail'}">
+                <div class="check-icon ${contrast.pass ? 'pass' : 'fail'}">${contrast.pass ? '✓' : '✗'}</div>
+                <div class="check-content">
+                    <div class="check-label">识别度</div>
+                    <div class="check-desc ${contrast.pass ? '' : 'fail'}">
+                        ${contrast.pass ? '对比度满足WCAG A标准' : '检测到识别度差，请联系设计师'}
+                    </div>
+                    <div class="check-detail">对比度: ${contrast.ratio}:1 ${contrast.pass ? '≥ 3:1 ✓' : '< 3:1 ✗'}</div>
+                </div>
+            </div>`;
+        }
+
+        function showCompareSection() {
+            document.getElementById('compareSection').classList.add('show');
+            document.getElementById('detailSection').classList.remove('show');
+            
+            const text = document.getElementById('tagText').value;
+            const sizes = calculateSizes();
+            const compareGrid = document.getElementById('compareGrid');
+            
+            if (isWhiteOnColorLogo) {
+                document.getElementById('singleSchemeNotice').style.display = 'flex';
+                document.getElementById('schemeB').style.display = 'none';
+                compareGrid.classList.add('single-scheme');
+                document.getElementById('schemeBadgeA').textContent = '唯一方案';
+                document.getElementById('schemeBadgeA').className = 'scheme-badge only';
+            } else {
+                document.getElementById('singleSchemeNotice').style.display = 'none';
+                document.getElementById('schemeB').style.display = 'block';
+                compareGrid.classList.remove('single-scheme');
+                document.getElementById('schemeBadgeA').textContent = '品牌底色';
+                document.getElementById('schemeBadgeA').className = 'scheme-badge solid';
+            }
+            
+            // 方案A
+            document.getElementById('tagA').style.borderColor = originalBrandColor;
+            document.getElementById('tagLogoA').style.backgroundColor = brandColorForBg;
+            document.getElementById('tagTextA').style.color = originalBrandColor;
+            document.getElementById('tagTextA').textContent = text;
+            document.getElementById('logoA').src = trimmedLogoDataUrl;
+            if (isWhiteOnColorLogo) {
+                document.getElementById('logoA').classList.remove('white-logo');
+            } else {
+                document.getElementById('logoA').classList.add('white-logo');
+            }
+            document.getElementById('logoA').style.maxWidth = sizes.logoWidth + 'px';
+            
+            // 方案B
+            document.getElementById('tagB').style.borderColor = originalBrandColor;
+            document.getElementById('tagLogoB').style.backgroundColor = 'transparent';
+            document.getElementById('tagTextB').style.color = originalBrandColor;
+            document.getElementById('tagTextB').textContent = text;
+            document.getElementById('logoB').src = trimmedLogoDataUrl;
+            document.getElementById('logoB').classList.remove('white-logo');
+            document.getElementById('logoB').style.maxWidth = sizes.logoWidth + 'px';
+            
+            // 渲染检测结果
+            document.getElementById('checkListA').innerHTML = renderCheckList('A');
+            document.getElementById('checkListB').innerHTML = renderCheckList('B');
+            
+            // 标记有问题的方案
+            document.getElementById('schemeA').classList.toggle('has-issue', !contrastResults.A.pass);
+            document.getElementById('schemeB').classList.toggle('has-issue', !contrastResults.B.pass);
+            
+            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出）` : `✓ ${sizes.totalWidth}px`;
+            const widthClass = sizes.isOverWidth ? 'warning' : 'ok';
+            document.getElementById('widthIndicatorA').textContent = widthNote;
+            document.getElementById('widthIndicatorA').className = `width-indicator ${widthClass}`;
+            document.getElementById('widthIndicatorB').textContent = widthNote;
+            document.getElementById('widthIndicatorB').className = `width-indicator ${widthClass}`;
+        }
+
+        function updateTagText() {
+            const text = document.getElementById('tagText').value;
+            document.getElementById('tagTextA').textContent = text;
+            document.getElementById('tagTextB').textContent = text;
+            
+            const sizes = calculateSizes();
+            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出200px）` : `✓ ${sizes.totalWidth}px`;
+            const widthClass = sizes.isOverWidth ? 'warning' : 'ok';
+            document.getElementById('widthIndicatorA').textContent = widthNote;
+            document.getElementById('widthIndicatorA').className = `width-indicator ${widthClass}`;
+            document.getElementById('widthIndicatorB').textContent = widthNote;
+            document.getElementById('widthIndicatorB').className = `width-indicator ${widthClass}`;
+            
+            document.getElementById('logoA').style.maxWidth = sizes.logoWidth + 'px';
+            document.getElementById('logoB').style.maxWidth = sizes.logoWidth + 'px';
+            
+            if (selectedScheme) {
+                document.getElementById('finalTagText').textContent = text;
+                document.getElementById('finalLogo').style.maxWidth = sizes.logoWidth + 'px';
+                updateDetailSection();
+            }
+        }
+
+        function selectScheme(scheme) {
+            selectedScheme = scheme;
+            document.getElementById('schemeA').classList.toggle('selected', scheme === 'A');
+            document.getElementById('schemeB').classList.toggle('selected', scheme === 'B');
+            showDetailSection();
+        }
+
+        function showDetailSection() {
+            document.getElementById('compareSection').classList.remove('show');
+            document.getElementById('detailSection').classList.add('show');
+            
+            const isA = selectedScheme === 'A';
+            let schemeName;
+            if (isWhiteOnColorLogo) {
+                schemeName = '品牌底色 + 原始白色Logo';
+            } else {
+                schemeName = isA ? '方案 A - 品牌底色 + 白色Logo' : '方案 B - 透明底色 + 原色Logo';
+            }
+            document.getElementById('selectedSchemeName').textContent = schemeName;
+            
+            const contrast = isA ? contrastResults.A : contrastResults.B;
+            
+            if (!contrast.pass) {
+                document.getElementById('selectedSchemeInfo').classList.add('has-issue');
+                document.getElementById('selectedSchemeNote').textContent = '识别度检测未通过';
+                document.getElementById('designerContactTip').style.display = 'flex';
+                document.getElementById('designerContactText').textContent = 
+                    `文字对比度 ${contrast.ratio}:1 低于WCAG A标准 3:1，在白色背景上可能难以辨认。`;
+            } else {
+                document.getElementById('selectedSchemeInfo').classList.remove('has-issue');
+                document.getElementById('selectedSchemeNote').textContent = '识别度检测通过';
+                document.getElementById('designerContactTip').style.display = 'none';
+            }
+            
+            updateDetailSection();
+        }
+
+        function updateDetailSection() {
+            const text = document.getElementById('tagText').value;
+            const isA = selectedScheme === 'A';
+            const sizes = calculateSizes();
+            
+            document.getElementById('finalTag').style.borderColor = originalBrandColor;
+            document.getElementById('finalTagLogo').style.backgroundColor = isA ? brandColorForBg : 'transparent';
+            document.getElementById('finalLogo').src = trimmedLogoDataUrl;
+            document.getElementById('finalLogo').style.maxWidth = sizes.logoWidth + 'px';
+            
+            if (isA && !isWhiteOnColorLogo) {
+                document.getElementById('finalLogo').classList.add('white-logo');
+            } else {
+                document.getElementById('finalLogo').classList.remove('white-logo');
+            }
+            
+            document.getElementById('finalTagText').style.color = originalBrandColor;
+            document.getElementById('finalTagText').textContent = text;
+            
+            const note = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px，建议缩短文字` : `✓ ${sizes.totalWidth}px（≤200px）`;
+            document.getElementById('finalWidthNote').textContent = note;
+            document.getElementById('finalWidthNote').className = sizes.isOverWidth ? 'final-width-note warning' : 'final-width-note';
+            
+            if (isA) {
+                if (isWhiteOnColorLogo) {
+                    document.getElementById('logoDownloadTitle').textContent = 'Logo图片（原始）';
+                    document.getElementById('logoDownloadPreview').src = trimmedLogoDataUrl;
+                } else {
+                    document.getElementById('logoDownloadTitle').textContent = 'Logo图片（白色版本）';
+                    document.getElementById('logoDownloadPreview').src = whiteLogoDataUrl;
+                }
+                document.getElementById('logoDownloadPreviewBox').style.backgroundColor = brandColorForBg;
+                document.getElementById('logoPreviewBox').className = 'download-item-preview solid-bg';
+                document.getElementById('logoPreviewBox').style.backgroundColor = brandColorForBg;
+            } else {
+                document.getElementById('logoDownloadTitle').textContent = 'Logo图片（裁切版）';
+                document.getElementById('logoDownloadPreview').src = trimmedLogoDataUrl;
+                document.getElementById('logoDownloadPreviewBox').style.backgroundColor = 'transparent';
+                document.getElementById('logoPreviewBox').className = 'download-item-preview';
+                document.getElementById('logoPreviewBox').style.backgroundColor = '';
+            }
+            
+            updateColorDisplay('border', originalBrandColor);
+            if (isA) {
+                updateColorDisplay('leftBg', brandColorForBg);
+            } else {
+                document.getElementById('leftBgSwatch').className = 'color-swatch transparent-swatch';
+                document.getElementById('leftBgSwatch').style.backgroundColor = '';
+                document.getElementById('leftBgHex').textContent = 'transparent';
+                document.getElementById('leftBgRgb').textContent = '透明';
+            }
+            updateColorDisplay('text', originalBrandColor);
+            
+            document.getElementById('tagSizeDisplay').textContent = `${sizes.totalWidth}px`;
+            document.getElementById('tagSizeDisplay').className = sizes.isOverWidth ? 'size-value warning' : 'size-value';
+            document.getElementById('logoSectionSize').textContent = `${sizes.logoSectionWidth}px`;
+            document.getElementById('textSectionSize').textContent = `${sizes.textSectionWidth}px`;
+            
+            updateCSSCode();
+            updateTagCanvas();
+        }
+
+        function goBack() {
+            document.getElementById('detailSection').classList.remove('show');
+            document.getElementById('compareSection').classList.add('show');
+            document.getElementById('leftBgSwatch').classList.remove('transparent-swatch');
+        }
+
+        function updateColorDisplay(type, hex) {
+            const rgb = hexToRgb(hex);
+            document.getElementById(`${type}Swatch`).style.backgroundColor = hex;
+            document.getElementById(`${type}Swatch`).classList.remove('transparent-swatch');
+            document.getElementById(`${type}Hex`).textContent = hex.toUpperCase();
+            document.getElementById(`${type}Rgb`).textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        }
+
+        function updateTagCanvas() {
+            const sizes = calculateSizes();
+            const canvas = document.getElementById('tagCanvas');
+            const scale = 2;
+            const isA = selectedScheme === 'A';
+            
+            canvas.width = sizes.totalWidth * scale;
+            canvas.height = SPEC.tagHeight * scale;
+            canvas.style.width = sizes.totalWidth + 'px';
+            canvas.style.height = SPEC.tagHeight + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(scale, scale);
+            ctx.clearRect(0, 0, sizes.totalWidth, SPEC.tagHeight);
+            
+            const r = SPEC.borderRadius;
+            
+            if (isA) {
+                ctx.fillStyle = brandColorForBg;
+                ctx.beginPath();
+                ctx.moveTo(r, 0);
+                ctx.lineTo(sizes.logoSectionWidth, 0);
+                ctx.lineTo(sizes.logoSectionWidth, SPEC.tagHeight);
+                ctx.lineTo(r, SPEC.tagHeight);
+                ctx.arcTo(0, SPEC.tagHeight, 0, SPEC.tagHeight - r, r);
+                ctx.lineTo(0, r);
+                ctx.arcTo(0, 0, r, 0, r);
+                ctx.fill();
+            }
+            
+            ctx.strokeStyle = originalBrandColor;
+            ctx.lineWidth = SPEC.borderWidth;
+            ctx.beginPath();
+            ctx.roundRect(0.5, 0.5, sizes.totalWidth - 1, SPEC.tagHeight - 1, r);
+            ctx.stroke();
+            
+            ctx.fillStyle = originalBrandColor;
+            ctx.font = `${SPEC.fontWeight} ${SPEC.fontSize}px -apple-system, "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(document.getElementById('tagText').value, sizes.logoSectionWidth + sizes.textSectionWidth / 2, SPEC.tagHeight / 2);
+            
+            const logoImg = new Image();
+            logoImg.onload = () => ctx.drawImage(logoImg, SPEC.logoPaddingLR, SPEC.logoPaddingTB, sizes.logoWidth, SPEC.logoHeight);
+            
+            if (isA && !isWhiteOnColorLogo) {
+                logoImg.src = whiteLogoDataUrl;
+            } else {
+                logoImg.src = trimmedLogoDataUrl;
+            }
+        }
+
+        function updateCSSCode() {
+            const text = document.getElementById('tagText').value;
+            const isA = selectedScheme === 'A';
+            const leftBg = isA ? brandColorForBg.toUpperCase() : 'transparent';
+            
+            let filterCode = '';
+            if (isA && !isWhiteOnColorLogo) {
+                filterCode = '\n    <span class="property">filter</span>: <span class="value">brightness(0) invert(1)</span>;';
+            }
+            
+            const css = `<span class="comment">/* 企业标签 - ${text} */</span>
+
+<span class="selector">.tag</span> {
+    <span class="property">display</span>: <span class="value">inline-flex</span>;
+    <span class="property">height</span>: <span class="value">28px</span>;
+    <span class="property">max-width</span>: <span class="value">200px</span>;
+    <span class="property">border</span>: <span class="value">1px solid ${originalBrandColor.toUpperCase()}</span>;
+    <span class="property">border-radius</span>: <span class="value">2px</span>;
+    <span class="property">overflow</span>: <span class="value">hidden</span>;
+}
+
+<span class="selector">.tag-logo</span> {
+    <span class="property">padding</span>: <span class="value">4px 6px</span>;
+    <span class="property">background</span>: <span class="value">${leftBg}</span>;
+}
+
+<span class="selector">.tag-logo img</span> {
+    <span class="property">height</span>: <span class="value">20px</span>;
+    <span class="property">width</span>: <span class="value">auto</span>;${filterCode}
+}
+
+<span class="selector">.tag-text</span> {
+    <span class="property">padding</span>: <span class="value">0 6px</span>;
+    <span class="property">font-size</span>: <span class="value">20px</span>;
+    <span class="property">line-height</span>: <span class="value">28px</span>;
+    <span class="property">font-weight</span>: <span class="value">400</span>;
+    <span class="property">color</span>: <span class="value">${originalBrandColor.toUpperCase()}</span>;
+}`;
+            
+            document.getElementById('cssCode').innerHTML = css;
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToRgb(hex) {
+            const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return r ? { r: parseInt(r[1], 16), g: parseInt(r[2], 16), b: parseInt(r[3], 16) } : { r: 0, g: 0, b: 0 };
+        }
+
+        function downloadLogo() {
+            const isA = selectedScheme === 'A';
+            const link = document.createElement('a');
+            const baseName = logoFile?.name?.replace(/\.[^/.]+$/, '') || 'logo';
+            
+            if (isA && !isWhiteOnColorLogo) {
+                link.download = `${baseName}-white.png`;
+                link.href = whiteLogoDataUrl;
+            } else {
+                link.download = `${baseName}-trimmed.png`;
+                link.href = trimmedLogoDataUrl;
+            }
+            link.click();
+            showToast('Logo下载成功');
+        }
+
+        function downloadTag() {
+            const sizes = calculateSizes();
+            const canvas = document.createElement('canvas');
+            const scale = 3;
+            const isA = selectedScheme === 'A';
+            
+            canvas.width = sizes.totalWidth * scale;
+            canvas.height = SPEC.tagHeight * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(scale, scale);
+            
+            const r = SPEC.borderRadius;
+            
+            if (isA) {
+                ctx.fillStyle = brandColorForBg;
+                ctx.beginPath();
+                ctx.moveTo(r, 0);
+                ctx.lineTo(sizes.logoSectionWidth, 0);
+                ctx.lineTo(sizes.logoSectionWidth, SPEC.tagHeight);
+                ctx.lineTo(r, SPEC.tagHeight);
+                ctx.arcTo(0, SPEC.tagHeight, 0, SPEC.tagHeight - r, r);
+                ctx.lineTo(0, r);
+                ctx.arcTo(0, 0, r, 0, r);
+                ctx.fill();
+            }
+            
+            ctx.strokeStyle = originalBrandColor;
+            ctx.lineWidth = SPEC.borderWidth;
+            ctx.beginPath();
+            ctx.roundRect(0.5, 0.5, sizes.totalWidth - 1, SPEC.tagHeight - 1, r);
+            ctx.stroke();
+            
+            ctx.fillStyle = originalBrandColor;
+            ctx.font = `${SPEC.fontWeight} ${SPEC.fontSize}px -apple-system, "PingFang SC", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(document.getElementById('tagText').value, sizes.logoSectionWidth + sizes.textSectionWidth / 2, SPEC.tagHeight / 2);
+            
+            const logoImg = new Image();
+            logoImg.onload = () => {
+                ctx.drawImage(logoImg, SPEC.logoPaddingLR, SPEC.logoPaddingTB, sizes.logoWidth, SPEC.logoHeight);
+                const link = document.createElement('a');
+                link.download = `tag-${document.getElementById('tagText').value}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('标签下载成功');
+            };
+            
+            if (isA && !isWhiteOnColorLogo) {
+                logoImg.src = whiteLogoDataUrl;
+            } else {
+                logoImg.src = trimmedLogoDataUrl;
+            }
+        }
+
+        function downloadJSON() {
+            const sizes = calculateSizes();
+            const isA = selectedScheme === 'A';
+            const contrast = isA ? contrastResults.A : contrastResults.B;
+            
+            const json = {
+                scheme: isA ? '品牌底色' : '透明底色',
+                tagText: document.getElementById('tagText').value,
+                checks: {
+                    contrast: {
+                        pass: contrast.pass,
+                        ratio: contrast.ratio,
+                        standard: 'WCAG A (3:1)'
+                    }
+                },
+                dimensions: sizes,
+                colors: { 
+                    border: originalBrandColor, 
+                    leftBg: isA ? brandColorForBg : 'transparent', 
+                    text: originalBrandColor
+                }
+            };
+            const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = 'tag-config.json';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            showToast('JSON下载成功');
+        }
+
+        function copyColor(type) {
+            const color = type === 'leftBg' && selectedScheme === 'B' ? 'transparent' : (type === 'leftBg' ? brandColorForBg : originalBrandColor);
+            navigator.clipboard.writeText(color.toUpperCase());
+            showToast(`已复制: ${color.toUpperCase()}`);
+        }
+
+        function copyAllColors() {
+            const isA = selectedScheme === 'A';
+            let text = `边框: ${originalBrandColor.toUpperCase()}\n背景: ${isA ? brandColorForBg.toUpperCase() : 'transparent'}\n文字: ${originalBrandColor.toUpperCase()}`;
+            navigator.clipboard.writeText(text);
+            showToast('已复制全部颜色');
+        }
+
+        function copyCSSCode() {
+            navigator.clipboard.writeText(document.getElementById('cssCode').textContent);
+            showToast('CSS代码已复制');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
