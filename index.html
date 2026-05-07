@@ -316,20 +316,14 @@
         
         .compare-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
         }
 
         .compare-grid.three-scheme {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         }
 
-        @media (max-width: 1100px) {
-            .compare-grid.three-scheme {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
         .compare-grid.single-scheme {
             grid-template-columns: 1fr;
             max-width: 500px;
@@ -347,6 +341,7 @@
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
+            min-width: 0;
         }
         
         .scheme-card:hover {
@@ -394,6 +389,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 16px;
+            overflow: hidden;
             background-color: #f5f5f5;
             background-image: 
                 linear-gradient(45deg, #e7e7e7 25%, transparent 25%),
@@ -401,6 +397,14 @@
                 linear-gradient(45deg, transparent 75%, #e7e7e7 75%),
                 linear-gradient(-45deg, transparent 75%, #e7e7e7 75%);
             background-size: 12px 12px;
+        }
+
+        .scheme-preview-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            transform-origin: center center;
         }
         
         .scheme-tag {
@@ -1024,11 +1028,13 @@
                             <div class="scheme-badge solid" id="schemeBadgeA">品牌底色</div>
                         </div>
                         <div class="scheme-preview">
-                            <div class="scheme-tag" id="tagA">
-                                <div class="scheme-tag-logo" id="tagLogoA">
-                                    <img id="logoA" src="">
+                            <div class="scheme-preview-inner">
+                                <div class="scheme-tag" id="tagA">
+                                    <div class="scheme-tag-logo" id="tagLogoA">
+                                        <img id="logoA" src="">
+                                    </div>
+                                    <div class="scheme-tag-text" id="tagTextA">协议酒店</div>
                                 </div>
-                                <div class="scheme-tag-text" id="tagTextA">协议酒店</div>
                             </div>
                         </div>
                         <div class="width-indicator" id="widthIndicatorA"></div>
@@ -1047,11 +1053,13 @@
                             <div class="scheme-badge transparent" id="schemeBadgeB">透明底色</div>
                         </div>
                         <div class="scheme-preview">
-                            <div class="scheme-tag" id="tagB">
-                                <div class="scheme-tag-logo" id="tagLogoB" style="background: transparent;">
-                                    <img id="logoB" src="">
+                            <div class="scheme-preview-inner">
+                                <div class="scheme-tag" id="tagB">
+                                    <div class="scheme-tag-logo" id="tagLogoB" style="background: transparent;">
+                                        <img id="logoB" src="">
+                                    </div>
+                                    <div class="scheme-tag-text" id="tagTextB">协议酒店</div>
                                 </div>
-                                <div class="scheme-tag-text" id="tagTextB">协议酒店</div>
                             </div>
                         </div>
                         <div class="width-indicator" id="widthIndicatorB"></div>
@@ -1070,11 +1078,13 @@
                             <div class="scheme-badge transparent" id="schemeBadgeC">透明底色</div>
                         </div>
                         <div class="scheme-preview">
-                            <div class="scheme-tag" id="tagC">
-                                <div class="scheme-tag-logo" id="tagLogoC" style="background: transparent;">
-                                    <img id="logoC" src="">
+                            <div class="scheme-preview-inner">
+                                <div class="scheme-tag" id="tagC">
+                                    <div class="scheme-tag-logo" id="tagLogoC" style="background: transparent;">
+                                        <img id="logoC" src="">
+                                    </div>
+                                    <div class="scheme-tag-text" id="tagTextC">协议酒店</div>
                                 </div>
-                                <div class="scheme-tag-text" id="tagTextC">协议酒店</div>
                             </div>
                         </div>
                         <div class="width-indicator" id="widthIndicatorC"></div>
@@ -1247,7 +1257,7 @@
 
         const SPEC = {
             tagHeight: 28,
-            maxTagWidth: 200,
+            maxTagWidth: 280,
             borderWidth: 1,
             borderRadius: 2,
             logoHeight: 20,
@@ -1297,6 +1307,12 @@
         uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.style.borderColor = '#d0d7de'; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
         fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
         document.getElementById('tagText').addEventListener('input', updateTagText);
+
+        let schemePreviewFitTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(schemePreviewFitTimer);
+            schemePreviewFitTimer = setTimeout(scheduleSchemePreviewFit, 100);
+        });
 
         function showLoading() {
             document.getElementById('loadingOverlay').classList.add('show');
@@ -1962,6 +1978,40 @@
             </div>`;
         }
 
+        /** 方案卡片预览区窄于标签实际宽度时整体缩小，避免棋盘格内溢出 */
+        function fitSchemePreviewInCards() {
+            document.querySelectorAll('.scheme-preview').forEach(preview => {
+                const card = preview.closest('#schemeA, #schemeB, #schemeC');
+                if (card && getComputedStyle(card).display === 'none') return;
+
+                const inner = preview.querySelector('.scheme-preview-inner');
+                if (!inner) return;
+                inner.style.transform = '';
+                const tag = inner.querySelector('.scheme-tag');
+                if (!tag) return;
+
+                const cs = getComputedStyle(preview);
+                const pl = parseFloat(cs.paddingLeft) || 0;
+                const pr = parseFloat(cs.paddingRight) || 0;
+                const available = preview.clientWidth - pl - pr;
+                if (available < 8) return;
+
+                const w = tag.getBoundingClientRect().width;
+                if (w > available + 0.5) {
+                    inner.style.transform = `scale(${available / w})`;
+                }
+            });
+        }
+
+        function scheduleSchemePreviewFit() {
+            fitSchemePreviewInCards();
+            requestAnimationFrame(() => {
+                fitSchemePreviewInCards();
+                setTimeout(fitSchemePreviewInCards, 50);
+                setTimeout(fitSchemePreviewInCards, 200);
+            });
+        }
+
         function showCompareSection() {
             document.getElementById('compareSection').classList.add('show');
             document.getElementById('detailSection').classList.remove('show');
@@ -2076,7 +2126,7 @@
             document.getElementById('schemeB').classList.toggle('has-issue', !contrastResults.B.pass);
             document.getElementById('schemeC').classList.toggle('has-issue', !contrastResults.C.pass);
             
-            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出）` : `✓ ${sizes.totalWidth}px`;
+            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出${SPEC.maxTagWidth}px）` : `✓ ${sizes.totalWidth}px`;
             const widthClass = sizes.isOverWidth ? 'warning' : 'ok';
             document.getElementById('widthIndicatorA').textContent = widthNote;
             document.getElementById('widthIndicatorA').className = `width-indicator ${widthClass}`;
@@ -2084,6 +2134,8 @@
             document.getElementById('widthIndicatorB').className = `width-indicator ${widthClass}`;
             document.getElementById('widthIndicatorC').textContent = widthNote;
             document.getElementById('widthIndicatorC').className = `width-indicator ${widthClass}`;
+
+            scheduleSchemePreviewFit();
         }
 
         function updateTagText() {
@@ -2093,7 +2145,7 @@
             document.getElementById('tagTextC').textContent = text;
             
             const sizes = calculateSizes();
-            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出200px）` : `✓ ${sizes.totalWidth}px`;
+            const widthNote = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px（超出${SPEC.maxTagWidth}px）` : `✓ ${sizes.totalWidth}px`;
             const widthClass = sizes.isOverWidth ? 'warning' : 'ok';
             document.getElementById('widthIndicatorA').textContent = widthNote;
             document.getElementById('widthIndicatorA').className = `width-indicator ${widthClass}`;
@@ -2111,6 +2163,8 @@
                 document.getElementById('finalLogo').style.maxWidth = sizes.logoWidth + 'px';
                 updateDetailSection();
             }
+
+            scheduleSchemePreviewFit();
         }
 
         function selectScheme(scheme) {
@@ -2185,7 +2239,7 @@
             document.getElementById('finalTagText').style.color = schemeColor;
             document.getElementById('finalTagText').textContent = text;
             
-            const note = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px，建议缩短文字` : `✓ ${sizes.totalWidth}px（≤200px）`;
+            const note = sizes.isOverWidth ? `⚠️ ${sizes.totalWidth}px，建议缩短文字` : `✓ ${sizes.totalWidth}px（≤${SPEC.maxTagWidth}px）`;
             document.getElementById('finalWidthNote').textContent = note;
             document.getElementById('finalWidthNote').className = sizes.isOverWidth ? 'final-width-note warning' : 'final-width-note';
             
@@ -2374,7 +2428,7 @@
 <span class="selector">.tag</span> {
     <span class="property">display</span>: <span class="value">inline-flex</span>;
     <span class="property">height</span>: <span class="value">28px</span>;
-    <span class="property">max-width</span>: <span class="value">200px</span>;
+    <span class="property">max-width</span>: <span class="value">${SPEC.maxTagWidth}px</span>;
     <span class="property">border</span>: <span class="value">1px solid ${schemeColor}</span>;
     <span class="property">border-radius</span>: <span class="value">2px</span>;
     <span class="property">overflow</span>: <span class="value">hidden</span>;
